@@ -1,13 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Security;
-using Rocky_DataAccess.Data;
 using Rocky_Models;
 using Rocky_Utility;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Rocky.Initializer
+namespace Rocky_DataAccess.Initializer 
 {
     public class DbInitializer : IDbInitializer
     {
@@ -18,8 +19,8 @@ namespace Rocky.Initializer
         public DbInitializer(ApplicationDbContext db, UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             _db = db;
-            _userManager = userManager;
             _roleManager = roleManager;
+            _userManager = userManager;
         }
 
         public void Initialize()
@@ -31,31 +32,32 @@ namespace Rocky.Initializer
                     _db.Database.Migrate();
                 }
             }
-            catch (Exception)
+            catch(Exception ex)
             {
 
             }
 
+
             if (!_roleManager.RoleExistsAsync(WC.AdminRole).GetAwaiter().GetResult())
             {
-                _roleManager.CreateAsync(new IdentityRole(WC.AdminRole)).GetAwaiter().GetResult();
-                _roleManager.CreateAsync(new IdentityRole(WC.CustomerRole)).GetAwaiter().GetResult();
+                 _roleManager.CreateAsync(new IdentityRole(WC.AdminRole)).GetAwaiter().GetResult();
+                 _roleManager.CreateAsync(new IdentityRole(WC.CustomerRole)).GetAwaiter().GetResult();
             }
             else
             {
                 return;
             }
 
-            _userManager.CreateAsync(new ApplicationUser {
-                UserName = "admin@mail.com", 
-                Email = "admin@mail.com",
+            _userManager.CreateAsync(new ApplicationUser
+            {
+                UserName = "admin@gmail.com",
+                Email = "admin@gmail.com",
                 EmailConfirmed = true,
-                FullName = "Admin tester",
-                PhoneNumber = "1111111111"
+                FullName = "Admin Tester",
+                PhoneNumber = "111111111111"
             }, "Admin123*").GetAwaiter().GetResult();
 
-            ApplicationUser user = _db.ApplicationUser.FirstOrDefault(u => u.Email == "admin@mail.com");
-
+            ApplicationUser user = _db.ApplicationUser.FirstOrDefault(u => u.Email == "admin@gmail.com");
             _userManager.AddToRoleAsync(user, WC.AdminRole).GetAwaiter().GetResult();
         }
     }

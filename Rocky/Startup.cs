@@ -1,18 +1,23 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Rocky.Initializer;
-using Rocky_DataAccess.Data;
+using Microsoft.Extensions.Options;
+using Rocky_DataAccess;
+using Rocky_DataAccess.Initializer;
 using Rocky_DataAccess.Repository;
 using Rocky_DataAccess.Repository.IRepository;
 using Rocky_Utility;
 using Rocky_Utility.BrainTree;
-using System;
 
 namespace Rocky
 {
@@ -28,17 +33,16 @@ namespace Rocky
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options => 
-            options.UseSqlServer(Configuration.GetConnectionString("DefaultConncetion")));
-            services.AddIdentity<IdentityUser, IdentityRole>()
+            services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(
+                Configuration.GetConnectionString("DefaultConnection")));
+            services.AddIdentity<IdentityUser,IdentityRole>()
                 .AddDefaultTokenProviders().AddDefaultUI()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-
             services.AddTransient<IEmailSender, EmailSender>();
 
-
-
+            services.AddDistributedMemoryCache();
             services.AddHttpContextAccessor();
             services.AddSession(Options =>
             {
@@ -46,26 +50,19 @@ namespace Rocky
                 Options.Cookie.HttpOnly = true;
                 Options.Cookie.IsEssential = true;
             });
-
             services.Configure<BrainTreeSettings>(Configuration.GetSection("BrainTree"));
             services.AddSingleton<IBrainTreeGate, BrainTreeGate>();
-
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IApplicationTypeRepository, ApplicationTypeRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IInquiryHeaderRepository, InquiryHeaderRepository>();
             services.AddScoped<IInquiryDetailRepository, InquiryDetailRepository>();
-            services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
+
             services.AddScoped<IOrderHeaderRepository, OrderHeaderRepository>();
             services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
-
+            services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
             services.AddScoped<IDbInitializer, DbInitializer>();
-
-            services.AddAuthentication().AddFacebook(Options =>
-            {
-                Options.AppId = "";
-                Options.AppSecret = "";
-            });
+            
 
             services.AddControllersWithViews();
         }
@@ -89,11 +86,8 @@ namespace Rocky
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-
             dbInitializer.Initialize();
-
             app.UseSession();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();

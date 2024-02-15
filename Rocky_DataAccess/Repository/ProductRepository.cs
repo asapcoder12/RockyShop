@@ -1,20 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
-using Rocky_DataAccess.Data;
 using Rocky_DataAccess.Repository.IRepository;
 using Rocky_Models;
 using Rocky_Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Threading;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Rocky_DataAccess.Repository
 {
     public class ProductRepository : Repository<Product>, IProductRepository
     {
         private readonly ApplicationDbContext _db;
-        public ProductRepository(ApplicationDbContext db) : base(db)
+        public ProductRepository(ApplicationDbContext db): base(db)
         {
             _db = db;
         }
@@ -37,7 +36,6 @@ namespace Rocky_DataAccess.Repository
                     Value = i.Id.ToString()
                 });
             }
-
             return null;
         }
 

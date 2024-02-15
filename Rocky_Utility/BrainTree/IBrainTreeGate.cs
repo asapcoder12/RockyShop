@@ -9,7 +9,8 @@ namespace Rocky_Utility.BrainTree
 {
     public interface IBrainTreeGate
     {
-        IBraintreeGateway CreteGateWay();
-        IBraintreeGateway GetGateWay();
+        IBraintreeGateway CreateGateway();
+
+        IBraintreeGateway GetGateway();
     }
 }

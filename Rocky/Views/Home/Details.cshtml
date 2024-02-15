@@ -1,16 +1,17 @@
 ﻿@model Rocky_Models.ViewModels.DetailsVM
-
+@using Rocky_Utility
+@using System.Globalization
 <div class="">
     <form method="post">
-        <input asp-for="@Model.Product.Id" hidden/>
-        <div class="container backgroundWhite pt-4"  >
+        <input asp-for="@Model.Product.Id" hidden />
+        <div class="container backgroundWhite pt-4">
             <div class="card" style="border:1px solid #000000; ">
                 <div class="card-header bg-dark text-light ml-0 row container" style="border-radius: 0px;">
                     <div class="col-12 col-md-6">
                         <h1 class="text-white">@Model.Product.Name</h1>
                     </div>
                     <div class="col-12 col-md-6 text-md-right">
-                        <h1 class="text-warning">@(Model.Product.Price.ToString("c", new CultureInfo("en-US")))</h1>
+                        <h1 class="text-warning"> @(string.Format(new CultureInfo("en-US"), "{0:C}", Model.Product.Price))</h1>
                     </div>
                 </div>
                 <div class="card-body">
@@ -27,7 +28,7 @@
                                         <span class="badge p-3 border text-dark" style="background-color:azure">@Model.Product.ApplicationType.Name</span>
                                         <h3 class="text-success"></h3>
 
-                                        <p class="text-secondary">@Html.Raw(Model.Product.Description)</p>
+                                        <p class="text-secondary">@Html.Raw(Model.Product.Description) </p>
                                     </div>
                                     @if (User.IsInRole(WC.AdminRole))
                                     {
@@ -37,11 +38,11 @@
                                         <div class="col-12">
                                             @if (Model.ExistsInCart)
                                             {
-                                                <input asp-for="@Model.Product.TempSqFt" disabled class="form-control"/>
+                                                <input asp-for="@Model.Product.TempSqFt" disabled class="form-control" />
                                             }
                                             else
                                             {
-                                                <input asp-for="@Model.Product.TempSqFt" class="form-control"/>
+                                                <input asp-for="@Model.Product.TempSqFt" class="form-control" />
                                             }
                                             <span asp-validation-for="@Model.Product.TempSqFt" class="text-danger"></span>
                                         </div>
@@ -57,13 +58,15 @@
                             <a asp-action="Index" class="btn btn-success btn-square form-control btn-lg" style="height:50px;">Back to List</a>
                         </div>
                         <div class="col-12 col-md-6 ">
-                             @if (Model.ExistsInCart)
+                            @if (Model.ExistsInCart)
                             {
-                                 <a asp-action="RemoveFromCart" asp-route-id="@Model.Product.Id" class="btn btn-warning btn-square form-control btn-lg" style="height:50px;">Remove from Cart</a>
+                                <a asp-action="RemoveFromCart" asp-route-id="@Model.Product.Id" class="btn btn-warning btn-square form-control btn-lg" style="height:50px;">Remove from Cart</a>
                             }
                             else
                             {
-                                <button type="submit" class="btn btn-info form-control btn-lg" style="height:50px;">Add to Cart</button>
+
+
+                                <button type="submit" asp-route-id="@Model.Product.Id" class="btn btn-info form-control btn-lg" style="height:50px;">Add to Cart</button>
                             }
                         </div>
                     </div>

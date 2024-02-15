@@ -1,27 +1,34 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Rocky_DataAccess.Data;
+using Rocky_DataAccess;
 using Rocky_DataAccess.Repository.IRepository;
 using Rocky_Models;
 using Rocky_Utility;
-using System.Collections.Generic;
-using System.Data;
 
 namespace Rocky.Controllers
 {
+
     [Authorize(Roles = WC.AdminRole)]
     public class ApplicationTypeController : Controller
     {
         private readonly IApplicationTypeRepository _appTypeRepo;
+
         public ApplicationTypeController(IApplicationTypeRepository appTypeRepo)
         {
             _appTypeRepo = appTypeRepo;
         }
+
+
         public IActionResult Index()
         {
             IEnumerable<ApplicationType> objList = _appTypeRepo.GetAll();
             return View(objList);
         }
+
 
         //GET - CREATE
         public IActionResult Create()
@@ -29,15 +36,23 @@ namespace Rocky.Controllers
             return View();
         }
 
+
         //POST - CREATE
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(ApplicationType obj)
         {
-            _appTypeRepo.Add(obj);
-            _appTypeRepo.Save();
-            return RedirectToAction("Index");
+            if (ModelState.IsValid)
+            {
+                _appTypeRepo.Add(obj);
+                _appTypeRepo.Save();
+                TempData[WC.Success] = "Action completed successfully";
+                return RedirectToAction("Index");
+            }
+            return View(obj);
+
         }
+
 
         //GET - EDIT
         public IActionResult Edit(int? id)
@@ -46,9 +61,7 @@ namespace Rocky.Controllers
             {
                 return NotFound();
             }
-
             var obj = _appTypeRepo.Find(id.GetValueOrDefault());
-
             if (obj == null)
             {
                 return NotFound();
@@ -66,9 +79,11 @@ namespace Rocky.Controllers
             {
                 _appTypeRepo.Update(obj);
                 _appTypeRepo.Save();
+                TempData[WC.Success] = "Action completed successfully";
                 return RedirectToAction("Index");
             }
             return View(obj);
+
         }
 
         //GET - DELETE
@@ -78,9 +93,7 @@ namespace Rocky.Controllers
             {
                 return NotFound();
             }
-
             var obj = _appTypeRepo.Find(id.GetValueOrDefault());
-
             if (obj == null)
             {
                 return NotFound();
@@ -95,16 +108,17 @@ namespace Rocky.Controllers
         public IActionResult DeletePost(int? id)
         {
             var obj = _appTypeRepo.Find(id.GetValueOrDefault());
-
             if (obj == null)
             {
                 return NotFound();
             }
-
             _appTypeRepo.Remove(obj);
             _appTypeRepo.Save();
-
+            TempData[WC.Success] = "Action completed successfully";
             return RedirectToAction("Index");
+
+
         }
+
     }
 }

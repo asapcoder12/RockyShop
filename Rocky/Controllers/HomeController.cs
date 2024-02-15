@@ -1,15 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Rocky_DataAccess.Data;
-using Rocky_DataAccess.Repository;
+using Rocky_DataAccess;
 using Rocky_DataAccess.Repository.IRepository;
 using Rocky_Models;
 using Rocky_Models.ViewModels;
 using Rocky_Utility;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 
 namespace Rocky.Controllers
 {
@@ -19,7 +20,8 @@ namespace Rocky.Controllers
         private readonly IProductRepository _prodRepo;
         private readonly ICategoryRepository _catRepo;
 
-        public HomeController(ILogger<HomeController> logger, IProductRepository prodRepo, ICategoryRepository catRepo)
+        public HomeController(ILogger<HomeController> logger, IProductRepository prodRepo,
+            ICategoryRepository catRepo)
         {
             _logger = logger;
             _prodRepo = prodRepo;
@@ -30,7 +32,7 @@ namespace Rocky.Controllers
         {
             HomeVM homeVM = new HomeVM()
             {
-                Products = _prodRepo.GetAll(includeProperties: "Category,ApplicationType"),
+                Products = _prodRepo.GetAll(includeProperties:"Category,ApplicationType"),
                 Categories = _catRepo.GetAll()
             };
             return View(homeVM);
@@ -38,21 +40,23 @@ namespace Rocky.Controllers
 
         public IActionResult Details(int id)
         {
-            List<ShoppingCart> ShoppingCartList = new List<ShoppingCart>();
-
+            List<ShoppingCart> shoppingCartList = new List<ShoppingCart>();
             if (HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WC.SessionCart) != null
                 && HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WC.SessionCart).Count() > 0)
             {
-                ShoppingCartList = HttpContext.Session.Get<List<ShoppingCart>>(WC.SessionCart);
+                shoppingCartList = HttpContext.Session.Get<List<ShoppingCart>>(WC.SessionCart);
             }
+
+
 
             DetailsVM DetailsVM = new DetailsVM()
             {
                 Product = _prodRepo.FirstOrDefault(u => u.Id == id, includeProperties: "Category,ApplicationType"),
-                ExistsInCart = false,
+                ExistsInCart = false
             };
 
-            foreach (var item in ShoppingCartList)
+
+            foreach(var item in shoppingCartList)
             {
                 if (item.ProductId == id)
                 {
@@ -63,44 +67,38 @@ namespace Rocky.Controllers
             return View(DetailsVM);
         }
 
-        [HttpPost, ActionName("Details")]
+        [HttpPost,ActionName("Details")]
         public IActionResult DetailsPost(int id, DetailsVM detailsVM)
         {
-            List<ShoppingCart> ShoppingCartList = new List<ShoppingCart>();
-
-            if (HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WC.SessionCart) != null 
+            List<ShoppingCart> shoppingCartList = new List<ShoppingCart>();
+            if(HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WC.SessionCart)!=null
                 && HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WC.SessionCart).Count() > 0)
             {
-                ShoppingCartList  = HttpContext.Session.Get<List<ShoppingCart>>(WC.SessionCart);
+                shoppingCartList = HttpContext.Session.Get<List<ShoppingCart>>(WC.SessionCart);
             }
-
-            ShoppingCartList.Add(new ShoppingCart { ProductId = id, SqFt = detailsVM.Product.TempSqFt });
-
-            HttpContext.Session.Set<List<ShoppingCart>>(WC.SessionCart, ShoppingCartList);
-
+            shoppingCartList.Add(new ShoppingCart { ProductId = id, SqFt= detailsVM.Product.TempSqFt});
+            HttpContext.Session.Set(WC.SessionCart, shoppingCartList);
+            TempData[WC.Success] = "Item add to cart successfully";
             return RedirectToAction(nameof(Index));
         }
 
-
         public IActionResult RemoveFromCart(int id)
         {
-            List<ShoppingCart> ShoppingCartList = new List<ShoppingCart>();
-
+            List<ShoppingCart> shoppingCartList = new List<ShoppingCart>();
             if (HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WC.SessionCart) != null
                 && HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WC.SessionCart).Count() > 0)
             {
-                ShoppingCartList = HttpContext.Session.Get<List<ShoppingCart>>(WC.SessionCart);
+                shoppingCartList = HttpContext.Session.Get<List<ShoppingCart>>(WC.SessionCart);
             }
 
-            var itemToRemove = ShoppingCartList.SingleOrDefault(u=>u.ProductId == id);
-
+            var itemToRemove = shoppingCartList.SingleOrDefault(r => r.ProductId == id);
             if (itemToRemove != null)
             {
-                ShoppingCartList.Remove(itemToRemove);
+                shoppingCartList.Remove(itemToRemove);
             }
             
-            HttpContext.Session.Set<List<ShoppingCart>>(WC.SessionCart, ShoppingCartList);
-
+            HttpContext.Session.Set(WC.SessionCart, shoppingCartList);
+            TempData[WC.Success] = "Item removed from cart successfully";
             return RedirectToAction(nameof(Index));
         }
 

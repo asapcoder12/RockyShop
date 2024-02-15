@@ -15,13 +15,13 @@
         @foreach (var prod in Model.Products)
         {
             <partial name="_IndividualProductCard" model="prod" />
-            //display all products
+            //display all product
         }
     </div>
 </div>
 
 @section Scripts{
-<script>
+    <script>
     $(document).ready(function(){
 
     $(".filter-button").click(function(){
@@ -35,10 +35,10 @@
         {
             $(".filter").not('.'+value).hide('3000');
             $('.filter').filter('.'+value).show('3000');
-            
+
         }
     });
 
 });
-</script>
+    </script>
 }
